@@ -1,0 +1,176 @@
+MAIN
+Istruzioni delete mancanti:
+- delete g1;
+- delete g2;
+- delete r1;
+- delete r2;
+
+Osservazioni su GestoreRifiuti:
+- lo stesso oggetto di tipo Rifiuto può aggiunto a più gestori 
+Osservazioni sulle classi MacchinaSmaltimento e MacchinaOrganico:
+- Costruttore con un parametro che indica se da riparare o meno.
+- Puntatore di tipo MacchinaSmaltimento che punta ad oggetto MacchinaOrganico
+Osservazioni sulle classi Rifiuto, RifiutoVetro, RifiutoOrganico:
+- Costruttore con un parametro che indica il peso.
+- Puntatori di tipo Rifiuto che puntano ad oggetti delle classi RifiutoOrganico e RifiutoVetro
+
+// Rimuove un rifiuto dalla coda rifiuti e lo processa utilizzando una macchina
+appropriata alla tipologia di rifiuto, invocando opportunamente un metodo nella classe
+MacchinaSmaltimento se presente tra le macchine disponibili restituendo true.
+Altrimenti false.
+bool GestoreRifiuti::processaRifiuto(){
+    Rifiuto* daProcessare=front();
+    for(unsigned i=0;i<numMacchine;i++){
+        if(macchine[i]->getTipo()==daProcessare->getTipo()){
+            macchine[i]->processa(daProcessare);
+            delete daProcessare;
+            erase(begin());
+            return true;
+        }
+    }
+    return false;
+}
+
+// Restituisce l’elenco delle macchine per lo smaltimento da riparare e le rimuove tra
+le macchine per lo smaltimento disponibili.
+list<MacchinaSmaltimento*> GestoreRifiuti::rimuoviMacchineDaRiparare()
+{
+    //Soluzione 1:
+    list<MacchinaSmaltimento*> listDaRiparare;
+    MacchinaSmaltimento** tmp = new MacchinaSmaltimento*[100];
+    unsigned j=0;
+    for(unsigned i=0;i<numMacchine;i++){
+        if(macchine[i]->daRiparare())
+            listDaRiparare.push_back(macchine[i]);
+        else
+            tmp[j++]=macchine[i];
+    }
+    delete [] macchine;
+    macchine=tmp;
+    numMacchine=j;
+    return listDaRiparare;
+
+    /* Soluzione 2
+    list<MacchinaSmaltimento*> listDaRiparare;
+    list<unsigned> posizioniMacchineDaRiparare;
+    for(unsigned i=0;i<numMacchine;i++){
+        if(macchine[i]->daRiparare()){
+            listDaRiparare.push_back(macchine[i]);
+            posizioniMacchineDaRiparare.push_back(i);
+        }
+    }
+    for(auto i:posizioniMacchineDaRiparare)
+        for(unsigned j=i;j<numMacchine-1;j++)
+            macchine[j]=macchine[j+1];
+    numMacchine=numMacchine-posizioniMacchineDaRiparare.size();
+    return listDaRiparare; */
+}
+
+// Una rifiuto può essere aggiunto solo se il suo perso sommato al peso dei rifiuti
+precedentemente aggiunti non sfora il carico massimo consentito. Inoltre, i rifiuti
+organici hanno maggiore priorità e devono essere inseriti per primi, mentre le altre
+tipologie vengono inserite in coda.
+void GestoreRifiuti::aggiungiRifiuto(Rifiuto* r)
+{
+    double peso=0;
+    for(unsigned i=0;i<size();i++)
+        peso+=at(i)->getPeso();
+    if(peso+r->getPeso()<=carico){
+        if(r->getTipo()==ORGANICO)
+        {
+            vector<Rifiuto*>::iterator it=begin();
+            while(it!=end() && (*it)->getTipo()==ORGANICO)
+                it++;
+            insert(it,r->clona());
+            /*In alternativa semplicemente:
+            insert(begin(),r->clona());*/
+        }
+        else {
+            push_back(r->clona());
+        }
+    }
+}
+
+
+
+enum TIPO {ORGANICO, VETRO, PLASTICA, CARTA, ALTRO };
+
+class Rifiuto {
+protected:
+    double peso;
+public:
+    Rifiuto():peso(0){}
+    Rifiuto(double p):peso(p){}
+    virtual TIPO getTipo() = 0;
+    virtual Rifiuto* clona() = 0;
+    double getPeso() const {return peso;}
+};
+
+class RifiutoOrganico : public Rifiuto {
+public:
+    RifiutoOrganico():Rifiuto(){}
+    RifiutoOrganico(double p):Rifiuto(p){}
+    virtual TIPO getTipo() {return ORGANICO;}
+    virtual Rifiuto* clona() {
+        Rifiuto* copia=new RifiutoOrganico(peso);
+        return copia;
+    }
+};
+
+class RifiutoVetro : public Rifiuto {
+public:
+    RifiutoVetro():Rifiuto(){}
+    RifiutoVetro(double p):Rifiuto(p){}
+    virtual TIPO getTipo() {return VETRO;}
+    virtual Rifiuto* clona() {
+        Rifiuto* copia=new RifiutoVetro(peso);
+        return copia;
+    }
+};
+
+class MacchinaSmaltimento {
+protected:
+    bool riparare;
+public:
+    MacchinaSmaltimento():riparare(false){};
+    MacchinaSmaltimento(bool b):riparare(b){};
+    virtual TIPO getTipo() = 0;
+    virtual void processa(Rifiuto* r) = 0;
+    bool daRiparare() const {return riparare;}
+};
+
+class MacchinaOrganico : public MacchinaSmaltimento {
+public:
+    MacchinaOrganico():MacchinaSmaltimento(){};
+    MacchinaOrganico(bool b):MacchinaSmaltimento(b){};
+    virtual TIPO getTipo() {return ORGANICO;};
+    virtual void processa(Rifiuto* r) { /*....*/ };
+};
+
+DOMANDE A RISPOSTA MULTIPLA.
+1.
+GestoreRifiuti::~GestoreRifiuti() {
+    for(vector<Rifiuto*>:: iterator it=begin(); it!=end();it++)
+        delete *it;
+    delete [] macchine;
+    /* In alternativa:
+    for(auto r:*this)
+        delete r;
+    delete [] macchine;*/
+}
+2. 
+bool GestoreRifiuti::operator==(const GestoreRifiuti& g){
+    if(size()!=g.size())
+        return false;
+    if(numMacchine!=g.numMacchine)
+        return false;
+    for(unsigned i=0;i<size();i++)
+        if(!((*at(i))==(*g.at(i))))
+            return false;
+    for(unsigned j=0;j<numMacchine;j++)
+        if(!(*macchine[j])==(*g.macchine[j])))
+            return false;
+    return true;
+}
+3. c
+4. d 

@@ -1,0 +1,172 @@
+/************************************** DOMANDA 1 *******************************************/
+class A {
+	private:
+		int* number;
+	public:  
+		A(){number = new int(10);}
+        A(const A& a){number=new int(a.number);}
+        ~A(){delete number;}
+        A& operator=(const A& a) {
+            if(this!=&a){
+                delete number;
+                number=new int(a.number);
+            }
+            return *this;
+        }
+};
+
+Risposte corrette:
+    Il distruttore va implementato così: ~A(){delete number;}
+    Il costruttore di copia va implementato così: A(const A& a){number=new int(a.number);}
+    L'operatore di assegnamento deve controllare l'autoassegnamento
+    L'operatore di assegnamento viene invocato su oggetti precedentemente creati in un costruttore
+
+/************************************** DOMANDA 2 *******************************************/
+#include <list>
+using namespace std;
+
+int main(){
+    
+    list<int> l;
+    l.push_back(1);
+    l.push_back(4);
+    l.push_back(2);
+    l.push_back(5);
+    // La lista l e' fatta così:
+    // [1]<->[4]<->[2]<->[5]
+
+    l.insert(l.begin(),3); //l.push_front(3);
+    // La lista l e' ora fatta così:
+    // [3]<->[1]<->[4]<->[2]<->[5]
+
+    return 0;
+}
+Operazioni effettuate per aggiungere il 3:
+ 1. si crea un nuovo nodo [3]
+ 2. si collega il nuovo nodo [3] con il nodo [1]
+ 3. si collega il nodo [1] con il nuovo nodo [3]
+NON C'E' ALCUNA REALLOCAZIONE: se avessimo avuto un vettore, 
+invece se la capacità non era sufficiente era necessario reallorcare e fare lo shift di tutti gli elementi in avanti
+
+Risposte corrette:
+    Liste e Vettori STL sono classi template
+    Aggiungere un elemento in un vettore STL può comportare una reallocazione
+    Una lista STL è costituita da nodi doppiamente concatenati
+    Un vettore STL è simile ad un array, infatti è memorizzato attraverso celle contigue in memoria
+
+/************************************** DOMANDA 3 *******************************************/
+
+Risposte corrette:
+    Le code si basano sul meccanismo FIFO
+    Nelle code il lato di inserimento ed estrazione sono opposti
+    Una coda può essere implementata tramite composizione
+    Una coda può essere implementata tramite ereditarietà
+
+/************************************** DOMANDA 4 *******************************************/
+
+Risposte corrette:
+    Le pile si basano sul meccanismo LIFO
+    Nelle pile il lato di inserimento ed estrazione sono opposti
+    Una pila può essere implementata tramite composizione
+    Una pila può essere implementata tramite ereditarietà
+
+/************************************** DOMANDA 5 *******************************************/
+
+Risposte corrette:
+    Corrisponde alla relazione "è un"
+    Dati e metodi public della classe base diventano public nella classe figlia
+    E' l'unico tipo di ereditarietà che permette di usare puntatori della classe base che puntano ad oggetti delle sue classi figlie
+
+/************************************** DOMANDA 6 *******************************************/
+1: int main(){
+2:    vector<Persona*> v; // v e' un vettore delete [] v e' ERRATO
+3:    Persona* p1=new Studente;
+4:    Persona* p2=p1; // p1 e p2 puntano allo stesso oggetto di tipo studente
+5:    v[0]=p1; // v viene creato come vuoto la posizione 0 non esiste
+6:    v.push_back(p2); // e' corretto perchè v è un vettore di Persona*
+7:    return 0; }
+
+Risposte corrette:
+    Bisogna fare delete p1; oppure delete p2; prima della linea 7
+    La linea 5 è errata perchè il vettore è vuoto
+
+/************************************** DOMANDE 7, 8 e 9 *******************************************/
+Riguardiamo la tabella riassuntiva su ereditarietà nelle slide della Lezione 7
+
+class A {
+	private:
+		int n_private;
+	protected:
+		int n_protected;
+	public:
+		int n_public;
+		A(): n_private(0),n_protected(1),n_public(2){};
+};
+
+class B : protected/private/public A {
+	public:
+		void stampa(){
+1:			cout<<"n_private: "<<n_private<<endl;
+2:			cout<<"n_protected: "<<n_protected<<endl;
+3:			cout<<"n_public: "<<n_public<<endl;
+		}
+};
+
+int main(){
+	B b;
+	b.stampa();
+4:  	cout<<b.n_private;
+5:     cout<<b.n_protected;
+6:     cout<<b.n_public;
+	return 0;
+}
+
+/************************************** DOMANDA 7 *******************************************/
+Sono errate:
+    Istruzione 1
+    Istruzione 4
+    Istruzione 5
+    Istruzione 6
+
+/************************************** DOMANDA 8 *******************************************/
+Sono errate:
+    Istruzione 1
+    Istruzione 4
+    Istruzione 5
+    Istruzione 6
+
+/************************************** DOMANDA 9 *******************************************/
+Sono errate:
+    Istruzione 1
+    Istruzione 4
+    Istruzione 5
+
+/************************************** DOMANDA 10 *******************************************/
+
+class A {
+    public:
+        A():c(10){};
+        virtual void m(){c=c/2;} // non è =0 quindi non è virtuale
+        void stampa(){cout<<c<<endl;}
+    protected:
+        int c;
+    };
+
+class B : public A {
+    public:
+        B(){d=new int(2);};
+        void m(){c=c*(*d);} // questo metodo è anche virtuale
+     private:
+        int* d;
+};
+
+1: int main() {
+2:     A* a = new B();
+3:     a->m(); //Si invoca il metodo m della classe B
+4:     (*a).stampa();  // e' corretto! In generale su un puntatore p fare (*p). oppure p-> e' la stessa cosa
+5:     delete a; // serve perchè a punta ad un oggetto dinamico, inoltre per ogni new serve una delete
+6:     return 0; }
+
+Risposte corrette:
+    Alla linea 4 si ottiene la stampa: 20
+    E' importante dotare le due classi di distruttori virtuali

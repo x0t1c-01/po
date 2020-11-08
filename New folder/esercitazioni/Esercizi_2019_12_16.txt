@@ -1,0 +1,8 @@
+Usando la classe Automobile dell'ultima volta, implementare un main che permetta di compiere le seguenti operazioni:
+
+1) Creare una lista di automobili
+2) Ordinare le automobili in ordine decrescente di prezzo
+3) Ordinare le automobili in ordine decrescente di prezzo e, a parità di prezzo, ordinare in ordine crescente di anno di produzione
+4) Sia M la media dei prezzi di tutte le automobili. Ordinare le automobili come segue, prima tutte le automobili il cui prezzo è minore di M in ordine di prezzo decrescente, poi tutte le altre in ordine di prezzo crescente.
+5) Sia M la media dei prezzi di tutte le automobili. Stampare il numero di marche che producono solo automobili con un prezzo superiore a M.
+6) Sia M la media dei prezzi di tutte le automobili. Stampare il numero du marche che non producono automobili con un prezzo superiore a M.
